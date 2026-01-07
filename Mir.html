@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memori Visual</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;1,500&display=swap');
+
+        body {
+            background-color: #050505;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .font-serif { font-family: 'Playfair Display', serif; }
+
+        /* Transisi Antar Tahap */
+        .step-container {
+            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+            position: absolute;
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .active-step {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+            position: relative;
+        }
+
+        /* Styling Foto */
+        .image-frame {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: transform 0.5s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .image-frame:hover {
+            transform: scale(1.02);
+        }
+
+        /* Pemutar Video */
+        .video-wrapper {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #000;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.05);
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Custom Progress Bar */
+        .progress-bar-container {
+            width: 100%;
+            height: 2px;
+            background: rgba(255,255,255,0.1);
+            margin-top: 20px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #ffffff;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .cursor-pointer-hover:hover {
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container px-6 flex flex-col items-center">
+        
+        <!-- TAHAP 1: TEKS AWAL -->
+        <div id="step-1" class="step-container active-step">
+            <h1 class="font-serif italic text-2xl md:text-4xl text-gray-300 cursor-pointer cursor-pointer-hover transition-all" onclick="goToStep(2)">
+                "Ada sebuah cerita yang ingin aku bagikan bagian favorit itu adalah.."
+            </h1>
+            <p class="mt-8 text-[10px] tracking-[0.4em] text-gray-600 uppercase">Klik tulisan untuk melanjutkan</p>
+        </div>
+
+        <!-- TAHAP 2: FOTO -->
+        <div id="step-2" class="step-container">
+            <div class="image-frame w-full max-w-md overflow-hidden cursor-pointer rounded-sm" onclick="goToStep(3)">
+                <!-- GANTI URL FOTO DI SINI -->
+                <img src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?q=80&w=1200&auto=format&fit=crop" 
+                     alt="Kenangan" class="w-full h-auto opacity-90">
+            </div>
+            <p class="mt-8 font-serif italic text-xl text-gray-400">Sebuah momen sederhana, namun sangat berarti.</p>
+            <p class="mt-4 text-[10px] tracking-[0.4em] text-gray-600 uppercase">Klik foto untuk melihat video</p>
+        </div>
+
+        <!-- TAHAP 3: PEMUTAR VIDEO -->
+        <div id="step-3" class="step-container">
+            <div class="video-wrapper relative group">
+                <video id="main-video">
+                    <!-- GANTI URL VIDEO DI SINI -->
+                    <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+                    Browser tidak mendukung video.
+                </video>
+
+                <!-- Tombol Putar Tengah (Hanya muncul saat pause) -->
+                <div id="play-overlay" class="absolute inset-0 flex items-center justify-center bg-black/40 cursor-pointer transition-opacity" onclick="togglePlay()">
+                    <div class="p-4 border border-white/20 rounded-full backdrop-blur-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kontrol Video Minimalis -->
+            <div class="w-full mt-4">
+                <div class="progress-bar-container" id="progress-container">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="flex justify-between mt-2 text-[10px] text-gray-500 uppercase tracking-widest">
+                    <span id="time-display">00:00</span>
+                    <button onclick="togglePlay()" id="btn-control">Putar</button>
+                </div>
+            </div>
+
+            <div id="final-message" class="mt-12 opacity-0 transition-opacity duration-1000">
+                <p class="font-serif italic text-lg text-gray-400">"Terima kasih telah menjadi bagian dari perjalanan ini."</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const video = document.getElementById('main-video');
+        const playOverlay = document.getElementById('play-overlay');
+        const progressFill = document.getElementById('progress-fill');
+        const progressContainer = document.getElementById('progress-container');
+        const timeDisplay = document.getElementById('time-display');
+        const btnControl = document.getElementById('btn-control');
+        const finalMessage = document.getElementById('final-message');
+
+        // Navigasi Tahap
+        function goToStep(stepNumber) {
+            // Sembunyikan semua tahap
+            document.querySelectorAll('.step-container').forEach(step => {
+                step.classList.remove('active-step');
+            });
+            
+            // Tampilkan tahap tujuan
+            const nextStep = document.getElementById(`step-${stepNumber}`);
+            nextStep.classList.add('active-step');
+
+            // Jika masuk ke tahap video, pastikan video siap
+            if (stepNumber === 3) {
+                video.load();
+            }
+        }
+
+        // Kontrol Video
+        function togglePlay() {
+            if (video.paused) {
+                video.play();
+                playOverlay.style.opacity = '0';
+                playOverlay.style.pointerEvents = 'none';
+                btnControl.textContent = 'Jeda';
+            } else {
+                video.pause();
+                playOverlay.style.opacity = '1';
+                playOverlay.style.pointerEvents = 'auto';
+                btnControl.textContent = 'Putar';
+            }
+        }
+
+        video.addEventListener('timeupdate', () => {
+            const percent = (video.currentTime / video.duration) * 100;
+            progressFill.style.width = `${percent}%`;
+
+            // Update waktu
+            const mins = Math.floor(video.currentTime / 60);
+            const secs = Math.floor(video.currentTime % 60);
+            timeDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            
+            // Munculkan pesan di akhir
+            if (video.currentTime > video.duration - 2) {
+                finalMessage.style.opacity = '1';
+            }
+        });
+
+        // Klik pada progress bar untuk melompat waktu
+        progressContainer.addEventListener('click', (e) => {
+            const rect = progressContainer.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            video.currentTime = pos * video.duration;
+        });
+
+        video.addEventListener('ended', () => {
+            playOverlay.style.opacity = '1';
+            playOverlay.style.pointerEvents = 'auto';
+            btnControl.textContent = 'Putar';
+        });
+    </script>
+</body>
+</html>

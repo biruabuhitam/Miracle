@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memori Visual</title>
+    <title>Memori Visual TikTok</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;1,500&display=swap');
@@ -30,7 +30,7 @@
             pointer-events: none;
             position: absolute;
             width: 100%;
-            max-width: 800px;
+            max-width: 400px; /* Lebar dibatasi untuk kesan ponsel/TikTok */
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -44,48 +44,62 @@
             position: relative;
         }
 
-        /* Styling Foto */
-        .image-frame {
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            transition: transform 0.5s ease;
+        /* Ukuran Vertikal TikTok (9:16) */
+        .tiktok-ratio {
+            width: 100%;
+            aspect-ratio: 9 / 16;
+            max-height: 80vh; /* Agar tidak terlalu tinggi di layar komputer */
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
             border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
         }
 
-        .image-frame:hover {
-            transform: scale(1.02);
+        /* Objek Media */
+        .media-fit {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Penting agar visual penuh */
+        }
+
+        /* Efek Kepingan */
+        .fragment {
+            position: absolute;
+            background-repeat: no-repeat;
+            pointer-events: none;
+            z-index: 50;
+            transition: transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 1s ease;
         }
 
         /* Pemutar Video */
         .video-wrapper {
-            width: 100%;
-            aspect-ratio: 16 / 9;
             background: #000;
-            border-radius: 4px;
-            overflow: hidden;
-            box-shadow: 0 0 40px rgba(255, 255, 255, 0.05);
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 1s ease;
         }
 
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
+        .video-wrapper.show {
+            opacity: 1;
+            transform: scale(1);
         }
 
-        /* Custom Progress Bar */
         .progress-bar-container {
             width: 100%;
-            height: 2px;
+            height: 3px;
             background: rgba(255,255,255,0.1);
             margin-top: 20px;
             cursor: pointer;
             position: relative;
+            border-radius: 4px;
         }
 
         .progress-fill {
             height: 100%;
             background: #ffffff;
             width: 0%;
-            transition: width 0.1s linear;
+            border-radius: 4px;
         }
 
         .cursor-pointer-hover:hover {
@@ -99,55 +113,55 @@
         
         <!-- TAHAP 1: TEKS AWAL -->
         <div id="step-1" class="step-container active-step">
-            <h1 class="font-serif italic text-2xl md:text-4xl text-gray-300 cursor-pointer cursor-pointer-hover transition-all" onclick="goToStep(2)">
-                "Ada sebuah cerita yang ingin aku bagikan bagian favorit itu adalah.."
+            <h1 class="font-serif italic text-2xl md:text-3xl text-gray-300 cursor-pointer cursor-pointer-hover transition-all leading-relaxed" onclick="goToStep(2)">
+                "Ada sebuah cerita yang ingin aku bagikan,bagian favorit itu adalah..ketika melihat seseorang"
             </h1>
-            <p class="mt-8 text-[10px] tracking-[0.4em] text-gray-600 uppercase">Klik tulisan untuk melanjutkan</p>
+            <p class="mt-8 text-[9px] tracking-[0.5em] text-gray-600 uppercase">Klik tulisan untuk membuka</p>
         </div>
 
-        <!-- TAHAP 2: FOTO -->
+        <!-- TAHAP 2: FOTO (VERTICAL SHATTER) -->
         <div id="step-2" class="step-container">
-            <div class="image-frame w-full max-w-md overflow-hidden cursor-pointer rounded-sm" onclick="goToStep(3)">
-                <!-- GANTI URL FOTO DI SINI -->
-                <img src="https://rawcdn.githack.com/biruabuhitam/Miracle/6df85a6eaf640b2ae08099f881ba2f8d2dc715f4/Gemini_Generated_Image_j0jt4pj0jt4pj0jt.png" 
-                     alt="Kenangan" class="w-full h-auto opacity-90">
+            <div id="photo-container" class="tiktok-ratio" onclick="handleShatter()">
+                <img id="main-photo" src="https://rawcdn.githack.com/biruabuhitam/Miracle/6df85a6eaf640b2ae08099f881ba2f8d2dc715f4/Gemini_Generated_Image_j0jt4pj0jt4pj0jt.png" 
+                     alt="Kenangan" class="media-fit">
             </div>
-            <p class="mt-8 font-serif italic text-xl text-gray-400">Sebuah momen sederhana, namun sangat berarti.</p>
-            <p class="mt-4 text-[10px] tracking-[0.4em] text-gray-600 uppercase">Klik foto untuk melihat video</p>
+            <div id="photo-text">
+                <p class="mt-6 font-serif italic text-lg text-gray-400">Sebuah momen sederhana.</p>
+                <p class="mt-2 text-[9px] tracking-[0.4em] text-gray-600 uppercase">Ketuk photo untuk memecah memori</p>
+            </div>
         </div>
 
-        <!-- TAHAP 3: PEMUTAR VIDEO -->
+        <!-- TAHAP 3: PEMUTAR VIDEO (VERTICAL) -->
         <div id="step-3" class="step-container">
-            <div class="video-wrapper relative group">
-                <video id="main-video">
-                    <!-- GANTI URL VIDEO DI SINI -->
+            <div id="video-box" class="video-wrapper tiktok-ratio group">
+                <video id="main-video" class="media-fit" playsinline>
                     <source src="https://rawcdn.githack.com/biruabuhitam/Miracle/c028311c1438fbf7d19ec7c7ef6b5deac46ef361/video_20260107_231411.webm" type="video/mp4">
                     Browser tidak mendukung video.
                 </video>
 
-                <!-- Tombol Putar Tengah (Hanya muncul saat pause) -->
+                <!-- Overlay Jeda/Putar -->
                 <div id="play-overlay" class="absolute inset-0 flex items-center justify-center bg-black/40 cursor-pointer transition-opacity" onclick="togglePlay()">
                     <div class="p-4 border border-white/20 rounded-full backdrop-blur-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M8 5v14l11-7z" />
                         </svg>
                     </div>
                 </div>
             </div>
 
-            <!-- Kontrol Video Minimalis -->
-            <div class="w-full mt-4">
+            <!-- Kontrol Video -->
+            <div class="w-full mt-4 px-2">
                 <div class="progress-bar-container" id="progress-container">
                     <div class="progress-fill" id="progress-fill"></div>
                 </div>
-                <div class="flex justify-between mt-2 text-[10px] text-gray-500 uppercase tracking-widest">
+                <div class="flex justify-between mt-2 text-[9px] text-gray-500 uppercase tracking-widest">
                     <span id="time-display">00:00</span>
                     <button onclick="togglePlay()" id="btn-control">Putar</button>
                 </div>
             </div>
 
-            <div id="final-message" class="mt-12 opacity-0 transition-opacity duration-1000">
-                <p class="font-serif italic text-lg text-gray-400">"Terima kasih telah menjadi bagian dari perjalanan ini."</p>
+            <div id="final-message" class="mt-8 opacity-0 transition-opacity duration-1000">
+                <p class="font-serif italic text-base text-gray-400">"Terima kasih telah menjadi bagian perjalanan ini."</p>
             </div>
         </div>
 
@@ -161,25 +175,70 @@
         const timeDisplay = document.getElementById('time-display');
         const btnControl = document.getElementById('btn-control');
         const finalMessage = document.getElementById('final-message');
+        const photoContainer = document.getElementById('photo-container');
+        const mainPhoto = document.getElementById('main-photo');
 
-        // Navigasi Tahap
         function goToStep(stepNumber) {
-            // Sembunyikan semua tahap
             document.querySelectorAll('.step-container').forEach(step => {
                 step.classList.remove('active-step');
             });
-            
-            // Tampilkan tahap tujuan
             const nextStep = document.getElementById(`step-${stepNumber}`);
             nextStep.classList.add('active-step');
-
-            // Jika masuk ke tahap video, pastikan video siap
-            if (stepNumber === 3) {
-                video.load();
-            }
         }
 
-        // Kontrol Video
+        let isShattered = false;
+        function handleShatter() {
+            if (isShattered) return;
+            isShattered = true;
+
+            const rows = 10; // Ditambah untuk rasio vertikal
+            const cols = 6;
+            const w = photoContainer.offsetWidth;
+            const h = photoContainer.offsetHeight;
+            const imgUrl = mainPhoto.src;
+
+            document.getElementById('photo-text').style.opacity = '0';
+
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const frag = document.createElement('div');
+                    frag.className = 'fragment';
+                    frag.style.width = (w / cols) + 'px';
+                    frag.style.height = (h / rows) + 'px';
+                    frag.style.left = (c * (w / cols)) + 'px';
+                    frag.style.top = (r * (h / rows)) + 'px';
+                    frag.style.backgroundImage = `url(${imgUrl})`;
+                    frag.style.backgroundSize = `${w}px ${h}px`;
+                    frag.style.backgroundPosition = `-${c * (w / cols)}px -${r * (h / rows)}px`;
+                    
+                    photoContainer.appendChild(frag);
+
+                    setTimeout(() => {
+                        const randomX = (Math.random() - 0.5) * 1500;
+                        const randomY = (Math.random() - 0.5) * 1500;
+                        const randomRot = (Math.random() - 0.5) * 1000;
+                        frag.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRot}deg) scale(0)`;
+                        frag.style.opacity = '0';
+                    }, 50);
+                }
+            }
+
+            mainPhoto.style.opacity = '0';
+
+            setTimeout(() => {
+                goToStep(3);
+                setTimeout(() => {
+                    document.getElementById('video-box').classList.add('show');
+                    video.play().catch(e => {
+                        playOverlay.style.opacity = '1';
+                    });
+                    playOverlay.style.opacity = '0';
+                    playOverlay.style.pointerEvents = 'none';
+                    btnControl.textContent = 'Jeda';
+                }, 500);
+            }, 800);
+        }
+
         function togglePlay() {
             if (video.paused) {
                 video.play();
@@ -197,19 +256,15 @@
         video.addEventListener('timeupdate', () => {
             const percent = (video.currentTime / video.duration) * 100;
             progressFill.style.width = `${percent}%`;
-
-            // Update waktu
             const mins = Math.floor(video.currentTime / 60);
             const secs = Math.floor(video.currentTime % 60);
             timeDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
             
-            // Munculkan pesan di akhir
             if (video.currentTime > video.duration - 2) {
                 finalMessage.style.opacity = '1';
             }
         });
 
-        // Klik pada progress bar untuk melompat waktu
         progressContainer.addEventListener('click', (e) => {
             const rect = progressContainer.getBoundingClientRect();
             const pos = (e.clientX - rect.left) / rect.width;
